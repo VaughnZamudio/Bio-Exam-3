@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Bio 115 — Exam Flashcard Deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f11;
+    --surface: #17171a;
+    --surface2: #1e1e23;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #f0ede8;
+    --text2: #9c9896;
+    --text3: #5a5856;
+    --accent: #e8d5a3;
+    --accent2: #c4a96a;
+    --know: #3a7a5c;
+    --know-bg: rgba(58,122,92,0.15);
+    --know-border: rgba(58,122,92,0.4);
+    --learn: #a05035;
+    --learn-bg: rgba(160,80,53,0.15);
+    --learn-border: rgba(160,80,53,0.4);
+    --radius: 16px;
+    --transition: 0.55s cubic-bezier(0.23, 1, 0.32, 1);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: pan-y;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .glow {
+    position: fixed;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(232,213,163,0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+    top: -200px; left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 16px calc(80px + var(--safe-bottom));
+  }
+
+  /* ── HEADER ── */
+  header {
+    padding: 24px 0 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .header-left h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(22px, 6vw, 36px);
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+  .header-left h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .header-left p {
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 5px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.04em;
+  }
+
+  .header-stats {
+    display: flex;
+    gap: 0;
+    flex-shrink: 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .stat {
+    padding: 8px 12px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+  }
+  .stat:last-child { border-right: none; }
+  .stat-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .stat-label {
+    font-size: 9px;
+    color: var(--text3);
+    font-family: 'DM Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 2px;
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .progress-bar-wrap {
+    flex: 1;
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+  .progress-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    white-space: nowrap;
+  }
+  .progress-know {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: #5aab84;
+    white-space: nowrap;
+  }
+
+  /* ── FILTER TABS (horizontal scroll) ── */
+  .filter-wrap {
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .filter-scroll {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 4px 0 6px;
+    scroll-padding-left: 0;
+  }
+  .filter-scroll::-webkit-scrollbar { display: none; }
+  .filter-btn {
+    flex-shrink: 0;
+    padding: 7px 14px;
+    border-radius: 100px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text2);
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    letter-spacing: 0.03em;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .filter-btn:active { opacity: 0.7; }
+  .filter-btn.active {
+    background: var(--accent2);
+    border-color: var(--accent2);
+    color: #0f0f11;
+    font-weight: 500;
+  }
+
+  /* ── MODE TABS ── */
+  .mode-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .mode-btn {
+    padding: 9px 8px;
+    border-radius: 10px;
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    color: var(--text2);
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mode-btn.active {
+    background: var(--surface2);
+    border-color: var(--border2);
+    color: var(--text);
+  }
+  .mode-btn.learn-mode.active {
+    background: var(--learn-bg);
+    border-color: var(--learn-border);
+    color: #e07050;
+  }
+
+  /* ── FLASHCARD ── */
+  .card-scene {
+    perspective: 1400px;
+    min-height: 280px;
+    cursor: pointer;
+    margin-bottom: 14px;
+    user-select: none;
+    touch-action: manipulation;
+  }
+
+  .card-inner {
+    position: relative;
+    width: 100%;
+    min-height: 280px;
+    transform-style: preserve-3d;
+    transition: transform var(--transition);
+  }
+  .card-inner.flipped { transform: rotateY(180deg); }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: var(--radius);
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    padding: 24px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    min-height: 280px;
+  }
+  .card-face::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(232,213,163,0.2), transparent);
+  }
+
+  .card-back {
+    transform: rotateY(180deg);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .card-system-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 100px;
+    border: 1px solid;
+    margin-bottom: 14px;
+    width: fit-content;
+    flex-shrink: 0;
+  }
+  .card-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .card-number {
+    position: absolute;
+    top: 16px; right: 18px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+  }
+
+  .card-question {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(17px, 4.5vw, 22px);
+    font-weight: 400;
+    line-height: 1.45;
+    color: var(--text);
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4px 0;
+  }
+  .card-flip-hint {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text3);
+    font-family: 'DM Mono', monospace;
+    margin-top: 12px;
+    flex-shrink: 0;
+  }
+
+  .card-answer {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+  .card-hint-box {
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: 12px 14px;
+    border-left: 3px solid var(--accent2);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text2);
+    flex-shrink: 0;
+  }
+  .card-hint-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--accent2);
+    margin-bottom: 4px;
+  }
+
+  .card-status-stripe {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    border-radius: var(--radius) 0 0 var(--radius);
+    transition: background 0.3s;
+  }
+  .card-status-stripe.know { background: var(--know); }
+  .card-status-stripe.learn { background: var(--learn); }
+
+  /* ── NAV + ACTIONS ROW ── */
+  .nav-actions {
+    display: grid;
+    grid-template-columns: 44px 44px 1fr 44px 44px;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .nav-btn {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    color: var(--text2);
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-btn:active { background: var(--surface2); transform: scale(0.93); }
+
+  .nav-counter {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text3);
+    text-align: center;
+  }
+
+  /* ── MARK BUTTONS ── */
+  .mark-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .btn-mark {
+    padding: 14px 12px;
+    border-radius: 12px;
+    border: 1px solid;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-mark:active { transform: scale(0.97); }
+
+  .btn-know {
+    border-color: var(--know-border);
+    color: #5aab84;
+    background: var(--know-bg);
+  }
+  .btn-know:active { background: rgba(58,122,92,0.25); }
+
+  .btn-learn {
+    border-color: var(--learn-border);
+    color: #e07050;
+    background: var(--learn-bg);
+  }
+  .btn-learn:active { background: rgba(160,80,53,0.25); }
+
+  /* ── DECK TOOLS (collapsed on mobile) ── */
+  .deck-tools-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-top: 1px solid var(--border);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .deck-tools-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text3);
+  }
+  .deck-tools-chevron {
+    color: var(--text3);
+    font-size: 12px;
+    transition: transform 0.2s;
+  }
+  .deck-tools-chevron.open { transform: rotate(180deg); }
+  .deck-tools-body {
+    display: none;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding-bottom: 16px;
+  }
+  .deck-tools-body.open { display: grid; }
+
+  .tool-btn {
+    padding: 11px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text2);
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex; align-items: center; gap: 6px;
+    text-align: left;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tool-btn:active { background: var(--surface2); }
+  .tool-btn.danger:active { color: #e07050; }
+  .tool-btn.full-width { grid-column: 1 / -1; }
+
+  /* ── SYSTEM PROGRESS PANEL ── */
+  .system-panel { margin-bottom: 20px; }
+  .panel-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text3);
+    margin-bottom: 10px;
+  }
+  .system-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .system-item {
+    padding: 12px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .system-item:active { border-color: var(--border2); background: var(--surface2); }
+  .system-item-name {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .system-item-bar {
+    height: 3px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 4px;
+  }
+  .system-item-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #3a7a5c, #5aab84);
+    border-radius: 2px;
+    transition: width 0.5s ease;
+  }
+  .system-item-count {
+    font-size: 10px;
+    color: var(--text3);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* ── SWIPE HINT ── */
+  .swipe-hint {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text3);
+    font-family: 'DM Mono', monospace;
+    padding: 8px 0 0;
+    display: none;
+  }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: calc(28px + var(--safe-bottom));
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 100px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    color: var(--text);
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    z-index: 999;
+    white-space: nowrap;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 48px 20px;
+    display: none;
+  }
+  .empty-state.visible { display: block; }
+  .empty-emoji { font-size: 44px; margin-bottom: 14px; }
+  .empty-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .empty-sub { font-size: 13px; color: var(--text3); margin-bottom: 20px; }
+  .btn-restart {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 22px;
+    border-radius: 100px;
+    border: 1px solid var(--border2);
+    background: var(--surface);
+    color: var(--text2);
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+  }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 100;
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    max-height: 80vh;
+    max-height: 80dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding-bottom: var(--safe-bottom);
+  }
+  .modal-handle {
+    width: 36px;
+    height: 4px;
+    background: var(--border2);
+    border-radius: 2px;
+    margin: 12px auto 0;
+    flex-shrink: 0;
+  }
+  .modal-header {
+    padding: 16px 20px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .modal-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    font-weight: 400;
+  }
+  .modal-close {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text2);
+    cursor: pointer;
+    font-size: 15px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .modal-body {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 12px 20px;
+    flex: 1;
+  }
+  .modal-card-item {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .modal-card-item:last-child { border-bottom: none; }
+  .modal-card-sys {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 2px 7px;
+    border-radius: 100px;
+    border: 1px solid var(--border2);
+    color: var(--text3);
+    white-space: nowrap;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+  .modal-card-q { font-size: 13px; color: var(--text2); line-height: 1.5; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes slideLeft {
+    0% { transform: translateX(0); opacity: 1; }
+    100% { transform: translateX(-50px); opacity: 0; }
+  }
+  @keyframes slideRight {
+    0% { transform: translateX(0); opacity: 1; }
+    100% { transform: translateX(50px); opacity: 0; }
+  }
+  @keyframes slideIn {
+    0% { transform: translateX(-24px); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+  }
+  .card-scene.animating .card-inner { animation: slideLeft 0.18s ease forwards; }
+  .card-scene.animating-prev .card-inner { animation: slideRight 0.18s ease forwards; }
+  .card-scene.slide-in .card-inner { animation: slideIn 0.22s ease forwards; }
+
+  /* ── KEYBOARD HINT (desktop only) ── */
+  .keyboard-row {
+    display: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .keyboard-row {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      padding: 14px 0;
+      border-top: 1px solid var(--border);
+      margin-top: 8px;
+    }
+    .kbd-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text3);
+      font-family: 'DM Mono', monospace;
+    }
+    kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px 7px;
+      border-radius: 5px;
+      border: 1px solid var(--border2);
+      background: var(--surface2);
+      font-size: 11px;
+      font-family: 'DM Mono', monospace;
+      color: var(--text2);
+      min-width: 24px;
+    }
+    .swipe-hint { display: none !important; }
+    .system-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+    .nav-actions {
+      grid-template-columns: 42px 42px 1fr 42px 42px;
+    }
+  }
+
+  /* ── TOUCH DEVICES ── */
+  @media (hover: none) {
+    .swipe-hint { display: block; }
+  }
+
+  /* ── DESKTOP WIDER ── */
+  @media (min-width: 600px) {
+    .app { padding: 0 24px 100px; }
+    header { padding: 36px 0 24px; }
+    .card-face { padding: 32px 36px 28px; }
+    .mark-row .btn-mark { padding: 14px 24px; font-size: 15px; }
+    .deck-tools-body { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="glow"></div>
+<div class="toast" id="toast"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Cards to Review</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<div class="app">
+  <!-- HEADER -->
+  <header>
+    <div class="header-top">
+      <div class="header-left">
+        <h1>Bio 115<br><em>Flashcards</em></h1>
+        <p id="deckMode">ALL SYSTEMS · <span id="deckCount">0</span> CARDS</p>
+      </div>
+      <div class="header-stats">
+        <div class="stat">
+          <div class="stat-num" id="statKnow">0</div>
+          <div class="stat-label">Known</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="statLearn">0</div>
+          <div class="stat-label">Work</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="statLeft">0</div>
+          <div class="stat-label">Unseen</div>
+        </div>
+      </div>
+    </div>
+    <!-- PROGRESS BAR -->
+    <div class="progress-row">
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <div class="progress-know" id="progressKnow">0 known</div>
+      <div class="progress-text" id="progressText">0 / 0</div>
+    </div>
+  </header>
+
+  <!-- SYSTEM FILTER (horizontal scroll) -->
+  <div class="filter-wrap">
+    <div class="filter-scroll" id="filters"></div>
+  </div>
+
+  <!-- MODE TOGGLE -->
+  <div class="mode-group">
+    <button class="mode-btn active" onclick="setMode('all')" id="modeAll">All cards</button>
+    <button class="mode-btn learn-mode" onclick="setMode('learn')" id="modeLearn">Need work</button>
+    <button class="mode-btn" onclick="setMode('unseen')" id="modeUnseen">Unseen</button>
+  </div>
+
+  <!-- CARD -->
+  <div class="card-scene" id="cardScene" onclick="flipCard()">
+    <div class="card-inner" id="cardInner">
+      <!-- FRONT -->
+      <div class="card-face" id="cardFront">
+        <div class="card-status-stripe" id="frontStripe"></div>
+        <div class="card-number" id="cardNumber"></div>
+        <div class="card-system-tag" id="frontTag"></div>
+        <div class="card-question" id="cardQ">Loading...</div>
+        <div class="card-flip-hint">tap to reveal answer</div>
+      </div>
+      <!-- BACK -->
+      <div class="card-face card-back" id="cardBack">
+        <div class="card-status-stripe" id="backStripe"></div>
+        <div class="card-system-tag" id="backTag"></div>
+        <div class="card-answer" id="cardA"></div>
+        <div class="card-hint-box" id="hintBox">
+          <div class="card-hint-label">Memory hint</div>
+          <div id="cardHint"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="swipe-hint">← swipe to navigate →</div>
+
+  <!-- NAV + COUNTER -->
+  <div class="nav-actions">
+    <button class="nav-btn" onclick="prevCard()" aria-label="Previous">←</button>
+    <button class="nav-btn" onclick="shuffleDeck()" aria-label="Shuffle" title="Shuffle">⇄</button>
+    <div class="nav-counter" id="navCounter">1 / 1</div>
+    <button class="nav-btn" onclick="markCard('know')" aria-label="Got it" style="background:var(--know-bg);border-color:var(--know-border);color:#5aab84;">✓</button>
+    <button class="nav-btn" onclick="nextCard()" aria-label="Next">→</button>
+  </div>
+
+  <!-- MARK BUTTONS -->
+  <div class="mark-row" id="cardActions">
+    <button class="btn-mark btn-know" onclick="markCard('know')">
+      ✓ Got it
+    </button>
+    <button class="btn-mark btn-learn" onclick="markCard('learn')">
+      ✗ Still learning
+    </button>
+  </div>
+
+  <!-- DECK TOOLS (collapsible) -->
+  <div>
+    <div class="deck-tools-header" onclick="toggleTools()">
+      <span class="deck-tools-label">Deck tools</span>
+      <span class="deck-tools-chevron" id="toolsChevron">▼</span>
+    </div>
+    <div class="deck-tools-body" id="toolsBody">
+      <button class="tool-btn" onclick="resetOrder()">↺ Reset order</button>
+      <button class="tool-btn" onclick="showKnown()">✓ Known (<span id="knownCount">0</span>)</button>
+      <button class="tool-btn" onclick="showLearn()">✗ Need work (<span id="learnCount">0</span>)</button>
+      <button class="tool-btn danger" onclick="clearProgress()">⊘ Clear progress</button>
+    </div>
+  </div>
+
+  <!-- SYSTEM PROGRESS PANEL -->
+  <div class="system-panel" style="margin-top:16px;">
+    <div class="panel-title">Progress by system</div>
+    <div class="system-grid" id="systemGrid"></div>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div class="empty-state" id="emptyState">
+    <div class="empty-emoji">🎉</div>
+    <div class="empty-title">Deck complete!</div>
+    <div class="empty-sub" id="emptyText">You've gone through all the cards in this mode.</div>
+    <button class="btn-restart" onclick="resetOrder()">↺ Start over</button>
+  </div>
+
+  <!-- KEYBOARD SHORTCUTS (desktop only) -->
+  <div class="keyboard-row">
+    <div class="kbd-item"><kbd>Space</kbd> flip</div>
+    <div class="kbd-item"><kbd>→</kbd> next</div>
+    <div class="kbd-item"><kbd>←</kbd> prev</div>
+    <div class="kbd-item"><kbd>K</kbd> know it</div>
+    <div class="kbd-item"><kbd>L</kbd> still learning</div>
+    <div class="kbd-item"><kbd>S</kbd> shuffle</div>
+  </div>
+</div>
+
+<script>
+// ── CARD DATA ──
+const SYSTEMS_ORDER = ["Development","Chromosomes","Genetics","DNA","Cancer","Ecology","Evolution"];
+
+const SYSTEM_COLORS = {
+  Development:{tag:"rgba(55,138,221,0.18)",border:"rgba(55,138,221,0.4)",text:"#7ab8f0",dot:"#378ADD"},
+  Chromosomes:{tag:"rgba(127,119,221,0.18)",border:"rgba(127,119,221,0.4)",text:"#a8a0f0",dot:"#7F77DD"},
+  Genetics:{tag:"rgba(212,83,126,0.18)",border:"rgba(212,83,126,0.4)",text:"#e87aaa",dot:"#D4537E"},
+  DNA:{tag:"rgba(29,158,117,0.18)",border:"rgba(29,158,117,0.4)",text:"#40c896",dot:"#1D9E75"},
+  Cancer:{tag:"rgba(216,90,48,0.18)",border:"rgba(216,90,48,0.4)",text:"#e87a50",dot:"#D85A30"},
+  Ecology:{tag:"rgba(99,153,34,0.18)",border:"rgba(99,153,34,0.4)",text:"#90c850",dot:"#639922"},
+  Evolution:{tag:"rgba(186,117,23,0.18)",border:"rgba(186,117,23,0.4)",text:"#e0a040",dot:"#BA7517"},
+};
+
+const ALL_CARDS = [
+// ── Section 1: Human Development & Aging ──
+{system:"Development",q:"What is fertilization and what structure does it produce?",a:"Fertilization is the union of sperm and egg to form a zygote.",hint:"Sperm + egg = ZYgote. 'Zy' sounds like 'tie the knot.'"},
+{system:"Development",q:"What is the zona pellucida?",a:"The outer matrix surrounding the egg.",hint:"ZP = Zona Pellucida. Think of it as the egg's 'force field.'"},
+{system:"Development",q:"What is the corona radiata?",a:"The few layers of follicular cells surrounding the zona pellucida on the outside.",hint:"Corona = crown. It's the 'crown' of follicle cells around the egg."},
+{system:"Development",q:"List the 5 steps of fertilization in order.",a:"1) Sperm penetrate corona radiata. 2) Acrosomal enzymes digest zona pellucida. 3) Sperm binds/fuses with egg plasma membrane. 4) Sperm nucleus enters egg. 5) Sperm and egg nuclei fuse.",hint:"CABNE — Corona, Acrosome, Bind, Nucleus in, Nuclear fusion."},
+{system:"Development",q:"What prevents polyspermy (more than one sperm entering)?",a:"The egg's plasma membrane changes to block other sperm, and vesicles release enzymes that make the zona pellucida impenetrable.",hint:"Two locks: membrane change + zona hardening."},
+{system:"Development",q:"What are the four basic processes of development?",a:"Cleavage (cells divide without size increase), Growth (cells enlarge), Morphogenesis (embryo changes shape), Differentiation (cells specialize).",hint:"CGMD — Can Germs Make Doctors? Cleavage, Growth, Morphogenesis, Differentiation."},
+{system:"Development",q:"What does the chorion do?",a:"It forms the fetal half of the placenta, providing nourishment and waste removal.",hint:"Chorion = Carries On (providing nutrients). Also = fetal side of placenta."},
+{system:"Development",q:"What does the allantois become?",a:"The bladder and the blood vessels of the umbilical cord.",hint:"Allantois → bLAdder + umbiLIcAL cord. Double L in both words."},
+{system:"Development",q:"What does the yolk sac do in humans?",a:"Contains blood vessels and is where blood cells first form (contains little actual yolk in humans).",hint:"Yolk = first blood factory. No food storage in humans — just blood."},
+{system:"Development",q:"What does the amnion do?",a:"Contains amniotic fluid that cushions and protects the embryo.",hint:"Amnion = water bag. Amniotic fluid = shock absorber."},
+{system:"Development",q:"What are the four stages of development in order?",a:"1) Pre-embryonic (1st week), 2) Embryonic (2nd week – end of 2nd month), 3) Fetal (3rd–9th months), 4) Post-birth (infancy, childhood, adolescence, adulthood).",hint:"P-E-F-P: Pre, Embryonic, Fetal, Post-birth."},
+{system:"Development",q:"What happens during pre-embryonic (first week) development?",a:"Cleavage occurs → morula (compact cell ball) → early blastocyst (inner cell mass + outer chorion layer) → implantation (~day 6).",hint:"1 week: divide → morula → blastocyst → implant. M-B-I: Morula, Blastocyst, Implant."},
+{system:"Development",q:"What is HCG and why is it important?",a:"Human chorionic gonadotropin — secreted after implantation to maintain the corpus luteum and endometrium. It is the basis of a pregnancy test.",hint:"HCG = pregnancy hormone. Keeps corpus luteum alive. Pee-on-a-stick hormone."},
+{system:"Development",q:"What are the 3 primary germ layers and when do they form?",a:"Endoderm, mesoderm, and ectoderm — formed during gastrulation in week 2.",hint:"EME: Ecto, Meso, Endo. Or 'Every Mama's Expecting.' Form in week 2."},
+{system:"Development",q:"When is the placenta fully formed and what does it do?",a:"Fully formed by the 10th week. It exchanges gases and nutrients between maternal and fetal blood, and produces HCG, estrogen, and progesterone.",hint:"Placenta = baby's life support. Done by week 10. Makes 3 hormones: HCG, E, P."},
+{system:"Development",q:"What happens to menstruation during pregnancy?",a:"It ceases — the placenta maintains the uterine lining and the corpus luteum is no longer needed.",hint:"Placenta takes over → no FSH → no new follicles → no period."},
+{system:"Development",q:"What forms during weeks 4 and 5 of embryonic development?",a:"Week 4: umbilical cord forms, limb buds appear. Week 5: head enlarges, eyes/ears/nose become prominent.",hint:"4 = limbs; 5 = face. 'Four limbs, five features.'"},
+{system:"Development",q:"What is complete by the end of the 2nd month?",a:"All organ systems have been established. The embryo has arms, legs, fingers, toes, and begins to look human. Reflex actions occur. It weighs ~same as an aspirin.",hint:"Month 2 = all organs set, looks human. Aspirin-sized."},
+{system:"Development",q:"When can fetal sex be distinguished and what controls male development?",a:"Sex can be distinguished at month 3. Male development requires androgens from the testes; female is the default state.",hint:"Month 3 = sex visible. Male needs androgens, female is default."},
+{system:"Development",q:"When do testes descend and when is fetal heartbeat detectable?",a:"Testes descend in month 4; heartbeat is detectable by Doppler in month 4.",hint:"Month 4: testes down + heartbeat detectable. 4-4."},
+{system:"Development",q:"What is lanugo?",a:"Fine downy hair covering the fetus during months 5–7.",hint:"Lanugo = LAnu-GOAT: like fuzz on a baby goat."},
+{system:"Development",q:"When do seventh-month babies frequently survive?",a:"At 7 months (~12 inches, ~3 pounds), fetuses frequently survive if born.",hint:"7 months = survival threshold. 12 inches, 3 pounds."},
+{system:"Development",q:"What happens in months 8 and 9?",a:"Fetus rotates head-down, fat accumulates under skin, gains weight. At birth ~7.5 lbs, ~20.5 inches.",hint:"Months 8–9: head down, fatten up. 7.5 lbs, 20.5 inches at term."},
+{system:"Development",q:"What is the SRY gene and what does it do?",a:"The sex-determining region on the Y chromosome. If present at ~week 6, the embryo develops as male.",hint:"SRY = Sir, you're a male. Present → male development."},
+{system:"Development",q:"What does anti-Mullerian hormone do?",a:"Secreted by testes; prevents development of female sex organs.",hint:"Anti-Mullerian = anti-female organs. Blocks the default."},
+{system:"Development",q:"What is androgen insensitivity syndrome?",a:"All hormones are made but testosterone receptors are ineffective, so the person has undescended testes and appears female outwardly.",hint:"AIS: has the T but cells ignore it → looks female. Receptors deaf to T."},
+{system:"Development",q:"What is XY female syndrome?",a:"A person develops as female because the piece of Y chromosome containing SRY is missing.",hint:"XY female = SRY is MIA. No SRY = no male = female."},
+{system:"Development",q:"What are the 3 stages of labor?",a:"Stage 1: cervix dilates, amnion tears, amniotic fluid released, mucus plug expelled. Stage 2: contractions every 1–2 min, positive feedback, baby delivered, cord cut. Stage 3: afterbirth (placenta) delivered ~15 min later.",hint:"1=Open, 2=Push+deliver, 3=Afterbirth. 'OPA.'"},
+{system:"Development",q:"What are the 3 fetal shunts that close after birth?",a:"Ductus venosus, foramen ovale, and ductus arteriosus — closing causes normal blood circulation.",hint:"3 D-F-D shunts close at birth. 'ductus, foramen, ductus.'"},
+{system:"Development",q:"What is colostrum?",a:"The antibody-rich fluid produced by mammary glands in the first two days after birth, before milk.",hint:"Colostrum = first milk. Antibody juice. First 2 days only."},
+{system:"Development",q:"What hormone triggers milk let-down and what stimulates it?",a:"Oxytocin triggers milk let-down; it is released by the hypothalamus signaling the anterior pituitary when suckling stimulates areolar nerve endings.",hint:"Suckling → hypothalamus → AP → oxytocin → let-down. Suck = flow."},
+{system:"Development",q:"What is the maximum human lifespan and what limits it?",a:"About 122 years. Lifespan is limited by the number of cell divisions, which is species-specific and controlled by telomere length.",hint:"122 years max. Telomeres = countdown clock for cells."},
+{system:"Development",q:"What are AGES and what do they cause?",a:"Advanced glycosylation end products — cross-linking collagen with age. Cause cataracts and atherosclerosis.",hint:"AGES = stiff collagen with age. AGE = Atherosclerosis, Glasses (cataracts)."},
+{system:"Development",q:"What is presbyopia?",a:"Age-related farsightedness due to reduced lens accommodation function.",hint:"Presbyopia = presby (elder) + opia (vision). Old eyes can't focus close."},
+
+// ── Section 2: Patterns of Chromosome Inheritance ──
+{system:"Chromosomes",q:"How many chromosomes do humans have, and how are they organized?",a:"46 chromosomes in 23 pairs. 22 pairs are autosomes; 1 pair is sex chromosomes. Diploid (2N) body cells have 46; haploid (N) gametes have 23.",hint:"46 total, 23 pairs, 2N=diploid, N=haploid. 22 auto + 1 sex."},
+{system:"Chromosomes",q:"What is a karyotype?",a:"The visual display of all chromosomes in a cell during metaphase, grouped and numbered by size and other features.",hint:"Karyotype = chromosome photo lineup. Metaphase snapshot."},
+{system:"Chromosomes",q:"What are the stages of the cell cycle?",a:"Interphase (G1: organelle doubling; S: DNA replication; G2: protein synthesis for division) + Cell division (Mitosis + Cytokinesis).",hint:"G1-S-G2 = prep. Then M+C = split. 'Good Students Get Marked Correct.'"},
+{system:"Chromosomes",q:"What are the 4 phases of mitosis in order?",a:"Prophase, Metaphase, Anaphase, Telophase (then cytokinesis).",hint:"PMAT. 'Please Make A Testimony.' Or 'People Meet And Talk.'"},
+{system:"Chromosomes",q:"What happens in prophase of mitosis?",a:"Chromosomes condense, nuclear envelope fragments, nucleolus disappears, centrosomes move to poles, spindle fibers form and attach to centromeres.",hint:"Prophase: chromosomes appear, envelope goes away, spindle forms."},
+{system:"Chromosomes",q:"What happens in anaphase of mitosis?",a:"Sister chromatids separate at the centromeres and move to opposite poles.",hint:"Anaphase = Apart. Sister chromatids split and go Away."},
+{system:"Chromosomes",q:"What forms during telophase and cytokinesis?",a:"Chromosomes arrive at poles, become chromatin again, nucleoli reappear, spindle disappears, nuclear envelope reassembles, cleavage furrow (actin ring) divides cytoplasm into 2 daughter cells.",hint:"Telophase = reverse of prophase + cytoplasm divides. 2 new nuclei, then split."},
+{system:"Chromosomes",q:"How does meiosis differ from mitosis in outcomes?",a:"Mitosis: 1 division → 2 diploid, genetically identical cells. Meiosis: 2 divisions → 4 haploid, genetically different cells.",hint:"Mitosis: 1 div = 2 clones. Meiosis: 2 divs = 4 uniques."},
+{system:"Chromosomes",q:"What is crossing over and when does it occur?",a:"Exchange of genetic information between non-sister chromatids of homologous chromosomes during synapsis in Prophase I of meiosis. Increases genetic variation.",hint:"Crossing over = gene swapping in Prophase I. Creates unique combos."},
+{system:"Chromosomes",q:"What happens in Meiosis I vs Meiosis II?",a:"Meiosis I: homologous chromosomes separate → 2 cells each with 23 duplicated chromosomes. Meiosis II: sister chromatids separate → 4 cells each with 23 unduplicated chromosomes.",hint:"Meiosis I = homologs split. Meiosis II = sisters split. 2 then 4."},
+{system:"Chromosomes",q:"What is nondisjunction?",a:"When homologous chromosomes fail to separate in meiosis I, or sister chromatids fail to separate in meiosis II, resulting in abnormal chromosome numbers.",hint:"Nondisjunction = chromosomes don't split properly. Leads to wrong numbers."},
+{system:"Chromosomes",q:"What are monosomy and trisomy? Give an example of each.",a:"Monosomy: cell has only 1 copy of a chromosome (e.g. Turner syndrome: XO). Trisomy: cell has 3 copies (e.g. Down syndrome: trisomy 21).",hint:"Mono = 1 copy (Turner XO). Tri = 3 copies (Down = 3×21)."},
+{system:"Chromosomes",q:"Describe Turner syndrome.",a:"XO female. Short, broad-shouldered, folds of skin on neck, underdeveloped ovaries/uterus, no menstruation or normal breast development. Can live normally with hormone supplements.",hint:"Turner = XO. Short female, no periods, neck folds. Add hormones to treat."},
+{system:"Chromosomes",q:"Describe Klinefelter syndrome.",a:"XXY male. Underdeveloped sex organs, breast development, large hands/long limbs, learning and speech delays. Testosterone injections help.",hint:"Klinefelter = XXY. Male with extra X → gynecomastia, long limbs, learning issues."},
+{system:"Chromosomes",q:"What is Jacob's syndrome (XYY)?",a:"XYY male — tall, persistent acne, speech and reading problems.",hint:"XYY = extra Y. Tall male, acne, speech/reading issues."},
+{system:"Chromosomes",q:"What are the four types of chromosome structure changes?",a:"Deletion (loss of a piece), Translocation (segment moves to nonhomologous chromosome), Duplication (segment repeated), Inversion (segment flipped 180°).",hint:"DTDI — Delete, Translocate, Duplicate, Invert. 'Don't Touch DNA Incorrectly.'"},
+{system:"Chromosomes",q:"What is Williams syndrome and what causes it?",a:"Caused by a small deletion on chromosome 7 affecting the elastin gene; leads to poor academic skills and premature aging.",hint:"Williams = del chr 7, elastin gene gone. Elastic tissues age fast."},
+{system:"Chromosomes",q:"What is spermatogenesis vs oogenesis?",a:"Spermatogenesis: continuous process after puberty, ~400 million sperm/day. Oogenesis: produces 1 egg + 3 polar bodies per cycle, ~500 eggs total in a lifetime.",hint:"Sperm = constant factory (400 million/day). Eggs = rare (500 lifetime)."},
+
+// ── Section 3: Patterns of Genetic Inheritance ──
+{system:"Genetics",q:"What is a genotype vs. a phenotype?",a:"Genotype: the actual genetic makeup (alleles) of an organism. Phenotype: the physical expression/outward appearance of the genotype.",hint:"Genotype = genes inside. Phenotype = physical you can see."},
+{system:"Genetics",q:"What is an allele?",a:"An alternate form of a gene located at a specific locus on a chromosome.",hint:"Allele = alternate version of a gene. Like a gene's flavor."},
+{system:"Genetics",q:"What is the difference between dominant and recessive alleles?",a:"Dominant: one copy is enough to be expressed (uppercase letter). Recessive: both copies must be present to be expressed (lowercase letter).",hint:"Dominant = one is enough. Recessive = need two to show."},
+{system:"Genetics",q:"Define homozygous dominant, homozygous recessive, and heterozygous.",a:"Homozygous dominant: two dominant alleles (TT). Homozygous recessive: two recessive alleles (tt). Heterozygous: one of each (Tt).",hint:"TT = dominant; tt = recessive; Tt = hetero (mixed). Same=homo, different=hetero."},
+{system:"Genetics",q:"What is a Punnett square and what is the 3:1 phenotypic ratio?",a:"A Punnett square predicts cross outcomes. A monohybrid cross between two heterozygotes (Ff × Ff) gives a 3:1 phenotypic ratio (3 dominant : 1 recessive) and 1:2:1 genotypic ratio.",hint:"Ff × Ff → 1 FF : 2 Ff : 1 ff → 3 freckled : 1 not. '3 to 1.'"},
+{system:"Genetics",q:"What is a dihybrid cross and its phenotypic ratio?",a:"A cross examining two traits. A dihybrid × dihybrid (AaBb × AaBb) gives a 9:3:3:1 phenotypic ratio.",hint:"9:3:3:1 — only for dihybrid × dihybrid. 9 both dominant, 3+3 one each, 1 both recessive."},
+{system:"Genetics",q:"What is an autosomal recessive disorder? Give examples.",a:"Only homozygous recessive (aa) individuals are affected. Carriers are heterozygotes (Aa). Examples: Cystic fibrosis, Tay-Sachs, PKU.",hint:"AR = both copies broken to show it. Carrier = Aa (looks normal). CF, Tay-Sachs, PKU."},
+{system:"Genetics",q:"What causes cystic fibrosis?",a:"A defective chloride ion channel that causes chloride ions and water to be trapped inside cells, leading to thick sticky mucus in the respiratory tract.",hint:"CF = broken Cl- channel → thick mucus in lungs. Chloride stuck inside."},
+{system:"Genetics",q:"What causes Tay-Sachs disease?",a:"Lack of the lysosomal enzyme Hex A, causing fatty acid proteins to accumulate in the brain. Causes blindness, seizures, paralysis, death by age 5. Common in Ashkenazic Jewish people.",hint:"Tay-Sachs = no Hex A enzyme → fatty buildup in brain → dead by 5. Ash. Jewish."},
+{system:"Genetics",q:"What causes PKU?",a:"Lack of enzyme to metabolize phenylalanine; untreated causes severe intellectual disability. Newborns are routinely screened and put on a low-phenylalanine diet.",hint:"PKU = can't break down phenylalanine. Diet fix available. Screened at birth."},
+{system:"Genetics",q:"What is an autosomal dominant disorder? Give an example.",a:"Individuals with AA or Aa genotypes have the disorder — only one dominant allele is needed. Example: Huntington disease.",hint:"AD = one bad copy is enough. Huntington = delayed onset (30s–40s), no cure."},
+{system:"Genetics",q:"Describe Huntington disease.",a:"Caused by a mutation in the huntingtin protein that forms clumps in neurons. Symptoms appear in late 30s–40s: uncontrolled movements, dementia, speech impairment. Patients live 15–20 years after onset. No cure.",hint:"Huntington: HD = delayed death sentence. 30s-40s onset, 15-20 yr survival, no cure."},
+{system:"Genetics",q:"What is polygenic inheritance?",a:"Traits controlled by several gene sets with additive dominant allele effects, resulting in continuous variation (bell curve). Examples: skin color, height.",hint:"Polygenic = many genes, bell curve distribution. Skin color, height = polygenic."},
+{system:"Genetics",q:"What is incomplete dominance? Give an example.",a:"The heterozygote is intermediate between the two homozygotes. Example: CC (curly) × SS (straight) → CS (wavy hair).",hint:"Incomplete dominance = blend in the middle. Curly + Straight = Wavy."},
+{system:"Genetics",q:"What is codominance? Give an example.",a:"Both alleles are equally expressed in the heterozygote. Example: Type A blood (IAIA) × Type B (IBIB) → Type AB (IAIB).",hint:"Codominance = both show fully. AB blood = both A and B expressed."},
+{system:"Genetics",q:"What are the blood type genotypes for A, B, AB, and O?",a:"A: IAIA or IAi. B: IBIB or IBi. AB: IAIB. O: ii.",hint:"O = ii (double recessive). AB = IAIB (one of each). A or B can be homo or hetero."},
+{system:"Genetics",q:"What is X-linked inheritance?",a:"Traits controlled by genes on the X chromosome. Males (XY) are more often affected by recessive X-linked traits because they only have one X.",hint:"X-linked: males more affected (only 1 X to have the bad allele on)."},
+{system:"Genetics",q:"What are three X-linked recessive disorders?",a:"Color blindness (red-green), muscular dystrophy (muscle wasting, death by ~20), hemophilia (absent clotting factors VIII or IX).",hint:"X-linked recessive: C-M-H — Color blind, Muscular dystrophy, Hemophilia."},
+{system:"Genetics",q:"What is preimplantation genetic diagnosis (PGD)?",a:"Used for IVF embryos from parents heterozygous for a genetic disorder. One cell from the 8-cell embryo is tested; only unaffected embryos are implanted.",hint:"PGD = screen IVF embryos before implant. Test 1 cell at 8-cell stage. Safe."},
+
+// ── Section 4: DNA Biology and Technology ──
+{system:"DNA",q:"What are the three main functions of DNA?",a:"Replication (copy for next generation), Storage of information, Mutation (provides genetic variability).",hint:"DNA: Replicate, Store, Mutate. RSM."},
+{system:"DNA",q:"What are the building blocks of DNA and what are the base pairing rules?",a:"Nucleotides with deoxyribose sugar, phosphate, and 4 bases: A, T, G, C. A pairs with T (2 H-bonds); G pairs with C (3 H-bonds).",hint:"AT = 2 bonds (AT2). GC = 3 bonds (GC3). 'Great Chemistry' vs 'Adequate Ties.'"},
+{system:"DNA",q:"What is semiconservative replication?",a:"Each new double helix has one original strand and one newly made strand.",hint:"Semiconservative = keeps one old strand each. Half old, half new."},
+{system:"DNA",q:"What enzymes are involved in DNA replication?",a:"DNA helicase (unwinds/unzips DNA), DNA polymerase (adds new nucleotides), DNA ligase (seals breaks in the backbone).",hint:"Helicase = unzip. Polymerase = build. Ligase = seal."},
+{system:"DNA",q:"How does RNA differ from DNA?",a:"RNA has ribose sugar (not deoxyribose), uses uracil instead of thymine, is single-stranded, found in cytoplasm and nucleus. DNA is double-stranded, in nucleus only.",hint:"RNA = single strand, U not T, ribose, leaves nucleus. DNA stays home."},
+{system:"DNA",q:"What are the three types of RNA and their roles?",a:"mRNA: carries genetic info from DNA to ribosomes. rRNA: forms ribosome structure. tRNA: carries amino acids to ribosome during translation.",hint:"mRNA = message. rRNA = ribosome. tRNA = taxi for amino acids."},
+{system:"DNA",q:"What is transcription?",a:"DNA is read to produce mRNA in the nucleus. RNA polymerase copies the DNA template.",hint:"Transcription = nucleus, DNA → mRNA. RNA polymerase writes it."},
+{system:"DNA",q:"What are introns and exons?",a:"Introns: non-coding DNA segments removed from pre-mRNA. Exons: coding segments that are expressed and remain in mature mRNA.",hint:"Introns = Interrupted/Inert (removed). Exons = Expressed (kept). IN = In trash, EX = EXit out."},
+{system:"DNA",q:"What is a codon?",a:"A 3-base sequence on mRNA that codes for a specific amino acid. There are 64 codons: 61 code amino acids, 3 are stop codons. AUG is the start codon (methionine).",hint:"Codon = 3 bases on mRNA. AUG = start. 3 stop codons. 64 total."},
+{system:"DNA",q:"What is translation and where does it occur?",a:"The reading of mRNA to make a protein at ribosomes in the cytoplasm. Steps: Initiation (mRNA binds ribosome), Elongation (tRNA adds amino acids), Termination (stop codon).",hint:"Translation = cytoplasm, mRNA → protein. IET: Initiate, Elongate, Terminate."},
+{system:"DNA",q:"What is the anticodon?",a:"A 3-base sequence on tRNA that complementary base-pairs with the mRNA codon to bring the correct amino acid.",hint:"Anticodon on tRNA matches codon on mRNA. tRNA is the adapter."},
+{system:"DNA",q:"How many functional genes does the human genome have?",a:"About 23,000 functional genes in ~3.4 billion base pairs. Less than 2% codes for proteins.",hint:"23,000 genes. 3.4 billion base pairs. <2% codes protein. Rest is regulatory RNA."},
+{system:"DNA",q:"What is PCR and what does it do?",a:"Polymerase chain reaction — copies millions of DNA fragments. Steps: Denaturation (heat/single-strand), Annealing (primer attaches), Extension (DNA polymerase builds new strands).",hint:"PCR = DNA photocopier. DAE: Denature, Anneal, Extend."},
+{system:"DNA",q:"What is DNA fingerprinting and how is it used?",a:"PCR amplifies DNA, restriction enzymes cut it into fragments, gel electrophoresis separates by size into unique RFLPs. Used for forensics, paternity, identification.",hint:"DNA fingerprint = cut DNA + run gel = unique pattern. Restriction enzyme + gel = ID."},
+{system:"DNA",q:"What is CRISPR-Cas9?",a:"A genome editing tool using the Cas9 enzyme directed by a guide RNA to cut specific DNA sequences. PAM sequence protects bacteria from self-cutting.",hint:"CRISPR = DNA scissors guided by RNA. Cas9 = the blade. Guide RNA = GPS."},
+{system:"DNA",q:"What is gene therapy?",a:"Insertion of genetic material into human cells to treat a disorder. Ex vivo: cells removed, altered, returned. In vivo: gene inserted directly via viral vector.",hint:"Ex vivo = out then back (stem cells). In vivo = inject directly. In vivo effects don't last as long."},
+{system:"DNA",q:"What is recombinant DNA?",a:"DNA containing sequences from two or more different sources, created using restriction enzymes to cut and DNA ligase to seal.",hint:"Recombinant DNA = Frankenstein DNA. Restriction enzyme cuts, ligase seals."},
+{system:"DNA",q:"What is gene pharming?",a:"Using transgenic farm animals to produce pharmaceuticals in their milk.",hint:"Gene pharming = PharmACY meets FARM. Drug proteins in cow/sheep milk."},
+{system:"DNA",q:"What is xenotransplantation?",a:"Transplantation of animal organs into humans instead of human organs.",hint:"Xeno = foreign. Xenotransplant = animal organ → human body."},
+
+// ── Section 5: Cancer ──
+{system:"Cancer",q:"What is cancer?",a:"Uncontrolled cell growth resulting from accumulated mutations that cause loss of control over the cell cycle.",hint:"Cancer = cells that forgot how to stop dividing. Mutations kill brakes."},
+{system:"Cancer",q:"What are 4 key characteristics of cancer cells?",a:"Lack differentiation, immortal (no division limit), no contact inhibition, reduced need for growth factors.",hint:"Cancer: no specialty, no stop, no neighbor-awareness, self-sufficient. 4 NOs."},
+{system:"Cancer",q:"How do telomeres relate to cancer?",a:"Normal cells shorten telomeres each division. Cancer cells keep telomerase active, so telomeres don't shorten and cells divide indefinitely.",hint:"Telomerase = on in cancer. Normal = shortens and stops. Cancer never stops."},
+{system:"Cancer",q:"What is metastasis?",a:"Cancer cells spreading from the original tumor to begin new tumors elsewhere in the body.",hint:"Metastasis = cancer going rogue, spreading to new sites."},
+{system:"Cancer",q:"What is the difference between benign and malignant tumors?",a:"Benign: encapsulated, doesn't invade other tissues. Malignant: invasive, can metastasize, will kill the host.",hint:"Benign = boxed in, stays put. Malignant = escapes and spreads."},
+{system:"Cancer",q:"What are proto-oncogenes and oncogenes?",a:"Proto-oncogenes: normal genes that promote the cell cycle; ~100 exist. Oncogenes: mutated proto-oncogenes that cause cancer. Only one copy needs to mutate.",hint:"Proto-onco = accelerator pedal. Oncogene = stuck accelerator. 1 mutation = cancer."},
+{system:"Cancer",q:"What are tumor suppressor genes?",a:"Genes whose products inhibit the cell cycle and promote apoptosis. Both copies must mutate to lose function. Examples: p53, BRCA1, Bax.",hint:"Tumor suppressors = brakes. Need BOTH broken for cancer. p53 = master brake."},
+{system:"Cancer",q:"What does p53 do?",a:"Activates DNA repair enzymes and halts the cell cycle. Triggers apoptosis in cancer cells. Many tumors lack p53 activity.",hint:"p53 = guardian of genome. Stops cell, fixes DNA, or kills cell. Missing in many cancers."},
+{system:"Cancer",q:"What is BRCA1?",a:"A tumor suppressor gene coding for a DNA repair enzyme. Mutations prevent recognition of DNA damage, so cells progress through the cycle. Linked to breast cancer.",hint:"BRCA1 = breast cancer gene. DNA repair tool. When broken → unrepaired damage."},
+{system:"Cancer",q:"What are the 3 stages of cancer development?",a:"Initiation: single cell acquires mutation enabling repeated division. Promotion: tumor develops, more mutations occur. Progression: cells invade other tissues, become metastatic.",hint:"Initiation, Promotion, Progression. IPP. 'It Progresses Poorly.'"},
+{system:"Cancer",q:"What is angiogenesis and why does cancer need it?",a:"Formation of new blood vessels. Tumors require angiogenesis to grow large and receive nutrients.",hint:"Angiogenesis = tumor builds its own blood supply. No blood = no big tumor."},
+{system:"Cancer",q:"What are carcinomas, sarcomas, leukemias, lymphomas, and blastomas?",a:"Carcinomas: epithelial tissue cancers (skin, breast, lung, etc). Sarcomas: muscle/connective tissue. Leukemias: blood cancers. Lymphomas: lymphoid tissue. Blastomas: immature cell cancers.",hint:"Carci=skin/organ lining, Sarco=muscle/bone, Leuk=blood, Lymph=lymph nodes, Blasto=immature cells."},
+{system:"Cancer",q:"What percentage of cancers are related to tobacco?",a:"80% of all cancers are related to tobacco use. Combined with alcohol, risk increases further.",hint:"Tobacco = 80% of cancers. 80%. Biggest modifiable cause."},
+{system:"Cancer",q:"What viruses are linked to cancer?",a:"Hepatitis A and B → liver cancer. HPV (human papillomavirus) → cervical cancer. Epstein-Barr virus → nasopharyngeal cancer.",hint:"HepB → liver. HPV → cervix. EBV → throat. All have vaccines except EBV."},
+{system:"Cancer",q:"What is the ABCDE test for melanoma?",a:"Asymmetry, Border irregularity, Color variation, Diameter >6mm, Evolution (change over time).",hint:"ABCDE: Asymmetry, Border, Color, Diameter (>6mm), Evolution."},
+{system:"Cancer",q:"How does radiation therapy work?",a:"Ionizing radiation causes chromosomal breakage and disrupts the cell cycle. Cancer cells, being rapidly dividing, are more susceptible.",hint:"Radiation = break chromosomes in fast-dividing cells. Cancer divides fast → more damage."},
+{system:"Cancer",q:"What is immunotherapy for cancer?",a:"Using the immune system to fight cancer — vaccines, genetically engineered immune cells, or monoclonal antibodies (sometimes linked to radioactive isotopes or chemo drugs).",hint:"Immunotherapy = train or arm immune system against cancer. Antibody missiles."},
+
+// ── Section 6: Global Ecology ──
+{system:"Ecology",q:"What is ecology?",a:"The scientific study of relationships between living organisms and their physical environment, including distribution and abundance of organisms.",hint:"Ecology = organisms ↔ environment. Who lives where and why."},
+{system:"Ecology",q:"What is the difference between biosphere and ecosystem?",a:"Biosphere: all regions of Earth inhabited by living organisms. Ecosystem: a specific place where organisms interact with each other and their environment.",hint:"Biosphere = all life on Earth. Ecosystem = specific local community + environment."},
+{system:"Ecology",q:"What are autotrophs and heterotrophs?",a:"Autotrophs (producers): make organic nutrients using inorganic sources and energy. Heterotrophs (consumers): obtain energy by eating other organisms.",hint:"Auto = self-feed (plants). Hetero = eat others (animals). Auto = self."},
+{system:"Ecology",q:"What are the types of heterotrophs?",a:"Herbivores (eat plants), carnivores (eat animals), omnivores (eat both), detritus feeders (eat decomposing matter).",hint:"HCOD: Herb, Carni, Omni, Detritus feeders."},
+{system:"Ecology",q:"What is the 10% energy rule and why does it matter?",a:"Only about 10% of energy from one trophic level is available to the next. This is why food pyramids narrow at the top and why carnivores are rare.",hint:"10% rule: 1000 kg plants → 100 kg herbivore → 10 kg carnivore → 1 kg top carnivore."},
+{system:"Ecology",q:"What is the difference between a food chain and a food web?",a:"Food chain: single path of energy flow. Food web: all feeding relationships combined.",hint:"Chain = one path. Web = all paths together. Webs are more realistic."},
+{system:"Ecology",q:"What are the 4 biogeochemical cycles?",a:"Water cycle, Carbon cycle, Nitrogen cycle, Phosphorus cycle.",hint:"WCNP: Water, Carbon, Nitrogen, Phosphorus. 'We Can't Neglect Plants.'"},
+{system:"Ecology",q:"What is eutrophication?",a:"Excess nitrogen or phosphate runoff into water causes algal blooms that deplete oxygen, killing fish.",hint:"Eutrophication = fertilizer in water → algae bloom → fish die. Too much 'nutrients.'"},
+{system:"Ecology",q:"What is the role of nitrogen-fixing bacteria?",a:"Convert atmospheric nitrogen gas (N2) into ammonium that plants can use. Without them, plants can't access atmospheric nitrogen.",hint:"N-fixing bacteria = nitrogen brokers. N2 → NH4+ → usable for plants."},
+{system:"Ecology",q:"What are greenhouse gases and what causes them to increase?",a:"CO2, N2O, CH4 trap heat in the atmosphere. Burning fossil fuels and deforestation increase CO2; human activities raise all three.",hint:"Greenhouse gases = CO2, N2O, CH4. Fossil fuels + deforestation → more CO2."},
+{system:"Ecology",q:"What is carrying capacity?",a:"The maximum population size that an environment can sustain indefinitely with available resources.",hint:"Carrying capacity = environment's max population budget. Exceed it = crash."},
+{system:"Ecology",q:"What is desertification?",a:"Conversion of semi-arid land to desert-like conditions through overgrazing and vegetation removal.",hint:"Desertification = turning land into desert. Overgrazing + no plants = desert."},
+{system:"Ecology",q:"What are the main causes of extinction?",a:"Habitat loss (biggest cause), alien/invasive species, pollution, disease.",hint:"Extinction causes: Habitat loss #1, then Aliens (invasive), Pollution, Disease. HAPD."},
+{system:"Ecology",q:"What are renewable vs nonrenewable resources? Give examples.",a:"Nonrenewable: fossil fuels, minerals (limited supply). Renewable: water, plants, animals, solar, wind.",hint:"Non-renewable = fossil fuels. Renewable = sun, wind, water. Fossils = gone when gone."},
+
+// ── Section 7: Human Evolution ──
+{system:"Evolution",q:"What is chemical evolution and how did life originate?",a:"Gases from primitive atmosphere formed small organic molecules → combined into macromolecules (DNA, RNA, proteins) → protocells → true cells. RNA may have been first (RNA-first hypothesis).",hint:"Chem evo: gas → organics → macromolecules → protocell → true cell. RNA-first."},
+{system:"Evolution",q:"What is biological evolution?",a:"Change in a population or species over time. Two key points: common descent (shared chemistry) and adaptation to environment.",hint:"Bio evo = populations change over time. Common ancestor + adaptation."},
+{system:"Evolution",q:"What are Darwin's 3 key elements of natural selection?",a:"Variation (heritable physical differences), Competition (for limited resources), Adaptation (advantageous traits = more reproduction).",hint:"VCA: Variation, Competition, Adaptation. 'Very Competitive Adaptors.'"},
+{system:"Evolution",q:"What are the 4 lines of evidence for evolution?",a:"Fossils (fossil record), Biogeography (distribution of organisms), Anatomy (homologous/vestigial structures), Biochemistry (shared DNA, codons, amino acids).",hint:"FBAB: Fossils, Biogeography, Anatomy, Biochemistry. 'Find Big Ancient Beings.'"},
+{system:"Evolution",q:"What are homologous vs. analogous structures?",a:"Homologous: anatomically similar, shared common ancestry (e.g. vertebrate forelimbs). Analogous: same function but different ancestry/structure (e.g. bird wing vs insect wing).",hint:"Homologous = same ancestor, similar structure. Analogous = same function, different origin."},
+{system:"Evolution",q:"What are vestigial structures? Give an example.",a:"Anatomical features fully developed in one group but reduced/non-functional in another. Example: whale pelvic girdle.",hint:"Vestigial = leftovers from ancestors. Whale pelvis, human appendix, tailbone."},
+{system:"Evolution",q:"What is the Out-of-Africa hypothesis?",a:"Modern humans evolved from Homo erectus in Africa and later migrated to Europe and Asia. This has the most scientific support.",hint:"Out-of-Africa = humans started in Africa, spread out. Most supported model."},
+{system:"Evolution",q:"What are the characteristics of hominins?",a:"Bipedal, flatter face with more pronounced chin, larger brain size.",hint:"Hominins: Bipedal, Flat face, Big brain. BFB."},
+{system:"Evolution",q:"What were the australopithecines?",a:"Group of early hominins (~3 MYA in Africa). Walked upright, small brain, ape-like limbs. Lucy is a famous example. Africanus is likely ancestor of early Homo.",hint:"Australopith = walked upright, small brain, ~3 MYA. Lucy = famous fossil."},
+{system:"Evolution",q:"What are the 3 requirements to be classified as genus Homo?",a:"Brain size ≥600 cm³, evidence of tool use, jaw and teeth resembling humans.",hint:"Homo = 600cc+ brain, tools, human-like teeth. '600 Tools Teeth.'"},
+{system:"Evolution",q:"Compare Homo habilis and Homo erectus.",a:"H. habilis (~2 MYA): larger brain, primitive tools, omnivore, possible culture. H. erectus (~1.9–0.3 MYA): even larger brain, tall, erect, migrated to Europe/Asia, used fire, advanced tools.",hint:"Habilis = early human, primitive tools. Erectus = taller, fire, migrated. Erectus > Habilis."},
+{system:"Evolution",q:"Who were the Neandertals?",a:"Homo sapiens who lived in Europe/Asia. Massive brow ridges, low forehead, no chin, slightly larger brains than modern humans, made tools, buried dead.",hint:"Neandertals: stocky, big brows, buried dead, no chin. Europe-based. Made tools."},
+{system:"Evolution",q:"Who were the Cro-Magnons?",a:"Modern humans who entered Europe from Africa ~100,000 years ago. First fossils found in France (~26,000 years old). Had modern appearance, advanced culture, art, tools.",hint:"Cro-Magnon = us in ancient France. Modern humans. Art + culture."},
+{system:"Evolution",q:"How does human brain size compare to apes?",a:"Apes ~400 cc, modern humans ~1330 cc. Humans also have bipedalism, flatter face, opposable thumbs, toolmaking, language, complex culture.",hint:"Ape brain = 400cc. Human brain = 1330cc. More than 3× bigger. Plus tools + language."},
+{system:"Evolution",q:"What are Bergmann's and Allen's rules?",a:"Bergmann's rule: body size is larger in colder climates (conserves heat). Allen's rule: limbs/extremities are shorter in colder climates (reduces surface area).",hint:"Bergmann = bigger body in cold. Allen = shorter limbs in cold. Both reduce heat loss."},
+];
+
+// ── STATE ──
+let progress = JSON.parse(localStorage.getItem('bioflash_progress') || '{}');
+let activeFilter = 'All';
+let activeMode = 'all';
+let deck = [];
+let deckIdx = 0;
+let isFlipped = false;
+let toolsOpen = false;
+
+function getFilteredCards() {
+  let cards = activeFilter === 'All' ? ALL_CARDS : ALL_CARDS.filter(c => c.system === activeFilter);
+  if (activeMode === 'learn') cards = cards.filter(c => progress[cardKey(c)] === 'learn');
+  if (activeMode === 'unseen') cards = cards.filter(c => !progress[cardKey(c)]);
+  return cards;
+}
+
+function cardKey(card) {
+  return card.system + '::' + card.q.substring(0, 40);
+}
+
+function saveProgress() {
+  localStorage.setItem('bioflash_progress', JSON.stringify(progress));
+}
+
+// ── BUILD UI ──
+function buildFilters() {
+  const el = document.getElementById('filters');
+  const systems = ['All', ...SYSTEMS_ORDER];
+  systems.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn' + (s === 'All' ? ' active' : '');
+    btn.textContent = s;
+    btn.onclick = () => {
+      activeFilter = s;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.textContent === s));
+      rebuildDeck();
+      // Scroll active filter button into view
+      btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    };
+    el.appendChild(btn);
+  });
+}
+
+function buildSystemGrid() {
+  const el = document.getElementById('systemGrid');
+  el.innerHTML = '';
+  SYSTEMS_ORDER.forEach(sys => {
+    const sysCards = ALL_CARDS.filter(c => c.system === sys);
+    const known = sysCards.filter(c => progress[cardKey(c)] === 'know').length;
+    const pct = sysCards.length ? Math.round((known / sysCards.length) * 100) : 0;
+    const col = SYSTEM_COLORS[sys] || SYSTEM_COLORS.Hint;
+    const item = document.createElement('div');
+    item.className = 'system-item';
+    item.innerHTML = `
+      <div class="system-item-name">
+        <span style="width:7px;height:7px;border-radius:50%;background:${col.dot};flex-shrink:0;display:inline-block;"></span>
+        ${sys}
+      </div>
+      <div class="system-item-bar"><div class="system-item-fill" style="width:${pct}%"></div></div>
+      <div class="system-item-count">${known}/${sysCards.length} known</div>
+    `;
+    item.onclick = () => {
+      activeFilter = sys;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.textContent === sys));
+      rebuildDeck();
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    };
+    el.appendChild(item);
+  });
+}
+
+// ── DECK ──
+function rebuildDeck() {
+  deck = getFilteredCards();
+  deckIdx = 0;
+  isFlipped = false;
+  updateDeckLabel();
+  if (deck.length === 0) {
+    showEmpty();
+  } else {
+    document.getElementById('emptyState').classList.remove('visible');
+    renderCard();
+  }
+  updateStats();
+}
+
+function updateDeckLabel() {
+  const modeLabel = activeMode === 'all' ? 'ALL CARDS' : activeMode === 'learn' ? 'NEED WORK' : 'UNSEEN';
+  const sysLabel = activeFilter === 'All' ? 'ALL SYSTEMS' : activeFilter.toUpperCase();
+  document.getElementById('deckMode').innerHTML = `${sysLabel} · <span id="deckCount">${deck.length}</span> CARDS`;
+}
+
+function renderCard() {
+  if (deck.length === 0) return;
+  const card = deck[deckIdx];
+  const col = SYSTEM_COLORS[card.system] || SYSTEM_COLORS.Hint;
+  const key = cardKey(card);
+  const status = progress[key];
+
+  const inner = document.getElementById('cardInner');
+  inner.classList.remove('flipped');
+  isFlipped = false;
+
+  ['frontTag','backTag'].forEach(id => {
+    const el = document.getElementById(id);
+    el.innerHTML = `<span class="card-dot" style="background:${col.dot}"></span>${card.system}`;
+    el.style.background = col.tag;
+    el.style.borderColor = col.border;
+    el.style.color = col.text;
+  });
+
+  ['frontStripe','backStripe'].forEach(id => {
+    const el = document.getElementById(id);
+    el.className = 'card-status-stripe';
+    if (status === 'know') el.classList.add('know');
+    else if (status === 'learn') el.classList.add('learn');
+  });
+
+  document.getElementById('cardNumber').textContent = `${deckIdx + 1} / ${deck.length}`;
+  document.getElementById('cardQ').textContent = card.q;
+  document.getElementById('cardA').textContent = card.a;
+  document.getElementById('cardHint').textContent = card.hint;
+  document.getElementById('hintBox').style.borderLeftColor = col.dot;
+
+  const pct = deck.length ? Math.round(((deckIdx + 1) / deck.length) * 100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = `${deckIdx + 1} / ${deck.length}`;
+  document.getElementById('navCounter').textContent = `${deckIdx + 1} / ${deck.length}`;
+}
+
+function flipCard() {
+  isFlipped = !isFlipped;
+  document.getElementById('cardInner').classList.toggle('flipped', isFlipped);
+}
+
+function nextCard() {
+  if (deck.length === 0) return;
+  if (deckIdx < deck.length - 1) {
+    deckIdx++;
+    renderCard();
+  } else {
+    showEmpty();
+  }
+}
+
+function prevCard() {
+  if (deck.length === 0) return;
+  if (deckIdx > 0) {
+    deckIdx--;
+    renderCard();
+  }
+}
+
+function markCard(status) {
+  if (deck.length === 0) return;
+  const card = deck[deckIdx];
+  const key = cardKey(card);
+  progress[key] = status;
+  saveProgress();
+  updateStats();
+  buildSystemGrid();
+  showToast(status === 'know' ? '✓ Got it!' : '✗ Noted for review');
+  setTimeout(() => {
+    if (deckIdx < deck.length - 1) {
+      deckIdx++;
+      if (activeMode === 'learn' && status === 'know') {
+        deck.splice(deckIdx - 1, 1);
+        deckIdx = Math.min(deckIdx - 1, deck.length - 1);
+        if (deck.length === 0) { showEmpty(); return; }
+      }
+      renderCard();
+    } else {
+      if (activeMode === 'learn' && status === 'know') {
+        deck.splice(deckIdx, 1);
+        deckIdx = Math.max(0, deck.length - 1);
+        if (deck.length === 0) { showEmpty(); return; }
+        renderCard();
+      } else {
+        showEmpty();
+      }
+    }
+  }, 300);
+}
+
+// ── STATS ──
+function updateStats() {
+  const allKeys = ALL_CARDS.map(cardKey);
+  const known = allKeys.filter(k => progress[k] === 'know').length;
+  const learn = allKeys.filter(k => progress[k] === 'learn').length;
+  const unseen = allKeys.filter(k => !progress[k]).length;
+  document.getElementById('statKnow').textContent = known;
+  document.getElementById('statLearn').textContent = learn;
+  document.getElementById('statLeft').textContent = unseen;
+  document.getElementById('knownCount').textContent = known;
+  document.getElementById('learnCount').textContent = learn;
+  const deckKnown = deck.filter(c => progress[cardKey(c)] === 'know').length;
+  document.getElementById('progressKnow').textContent = `${deckKnown} known`;
+}
+
+// ── MODES ──
+function setMode(mode) {
+  activeMode = mode;
+  document.getElementById('modeAll').classList.toggle('active', mode === 'all');
+  document.getElementById('modeLearn').classList.toggle('active', mode === 'learn');
+  document.getElementById('modeUnseen').classList.toggle('active', mode === 'unseen');
+  rebuildDeck();
+}
+
+// ── TOOLS ──
+function toggleTools() {
+  toolsOpen = !toolsOpen;
+  document.getElementById('toolsBody').classList.toggle('open', toolsOpen);
+  document.getElementById('toolsChevron').classList.toggle('open', toolsOpen);
+}
+
+function shuffleDeck() {
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  deckIdx = 0;
+  renderCard();
+  showToast('⇄ Deck shuffled');
+}
+
+function resetOrder() {
+  rebuildDeck();
+  showToast('↺ Order reset');
+}
+
+function clearProgress() {
+  if (!confirm('Clear all progress? This cannot be undone.')) return;
+  progress = {};
+  saveProgress();
+  rebuildDeck();
+  buildSystemGrid();
+  showToast('⊘ Progress cleared');
+}
+
+function showKnown() {
+  const cards = ALL_CARDS.filter(c => progress[cardKey(c)] === 'know');
+  openModal('Cards you know (' + cards.length + ')', cards);
+}
+
+function showLearn() {
+  const cards = ALL_CARDS.filter(c => progress[cardKey(c)] === 'learn');
+  openModal('Still learning (' + cards.length + ')', cards);
+}
+
+// ── MODAL ──
+function openModal(title, cards) {
+  document.getElementById('modalTitle').textContent = title;
+  const body = document.getElementById('modalBody');
+  if (cards.length === 0) {
+    body.innerHTML = '<p style="color:var(--text3);font-size:14px;padding:20px 0;">No cards here yet.</p>';
+  } else {
+    body.innerHTML = cards.map(c => `
+      <div class="modal-card-item">
+        <div class="modal-card-sys">${c.system}</div>
+        <div class="modal-card-q">${c.q}</div>
+      </div>
+    `).join('');
+  }
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+// ── EMPTY ──
+function showEmpty() {
+  const el = document.getElementById('emptyState');
+  el.classList.add('visible');
+  const msgs = {
+    all: "You've flipped through all the cards. Start over or try 'Need work' mode.",
+    learn: "All 'still learning' cards cleared — nice grind!",
+    unseen: "No unseen cards left in this filter. You've seen them all!"
+  };
+  document.getElementById('emptyText').textContent = msgs[activeMode] || msgs.all;
+}
+
+// ── TOAST ──
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+}
+
+// ── TOUCH/SWIPE ──
+let touchStartX = 0;
+let touchStartY = 0;
+let touchStartTime = 0;
+
+document.getElementById('cardScene').addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+  touchStartTime = Date.now();
+}, { passive: true });
+
+document.getElementById('cardScene').addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  const dt = Date.now() - touchStartTime;
+  const absDx = Math.abs(dx);
+  const absDy = Math.abs(dy);
+
+  // Swipe (not tap)
+  if (absDx > 40 && absDx > absDy * 1.5 && dt < 400) {
+    e.preventDefault();
+    if (dx < 0) nextCard();
+    else prevCard();
+  }
+  // Tap = flip (handled by onclick)
+}, { passive: true });
+
+// ── KEYBOARD ──
+document.addEventListener('keydown', e => {
+  if (document.getElementById('modalOverlay').classList.contains('open')) {
+    if (e.key === 'Escape') closeModal();
+    return;
+  }
+  if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipCard(); }
+  if (e.key === 'ArrowRight') nextCard();
+  if (e.key === 'ArrowLeft') prevCard();
+  if (e.key === 'k' || e.key === 'K') markCard('know');
+  if (e.key === 'l' || e.key === 'L') markCard('learn');
+  if (e.key === 's' || e.key === 'S') shuffleDeck();
+});
+
+// ── INIT ──
+buildFilters();
+buildSystemGrid();
+rebuildDeck();
+updateStats();
+</script>
+</body>
+</html>
